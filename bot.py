@@ -5,7 +5,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 import os
 
 # 🔐 Load your Telegram Bot token from environment variable (set in Railway)
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
+BOT_TOKEN = os.environ.get("8181366770:AAHpCP7uF2-WAV0Pqo1iiA8XIaUiDMWAT7g")
 
 # 🔐 Firebase Setup
 cred = credentials.Certificate("firebase_key.json")  # your Firebase JSON file
