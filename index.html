@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Chat</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        body {
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Auth Page Styles */
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .logo i {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .auth-form {
+            width: 100%;
+            max-width: 350px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .auth-form input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .auth-form button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        #login-btn {
+            background-color: #4a6ee0;
+            color: white;
+        }
+        
+        #signup-btn {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            color: #999;
+            position: relative;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #ddd;
+        }
+        
+        .divider::before {
+            left: 0;
+        }
+        
+        .divider::after {
+            right: 0;
+        }
+        
+        .google-btn {
+            background-color: #4285f4 !important;
+            color: white !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .google-btn i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        /* Chat Page Styles */
+        .snap-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: #fffc00;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #333;
+            cursor: pointer;
+        }
+        
+        #user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .header-tabs {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .tab-btn.active {
+            color: #333;
+        }
+        
+        .tab-btn.active::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #333;
+        }
+        
+        .stories-container {
+            padding: 15px;
+            overflow-x: auto;
+            white-space: nowrap;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .stories-scroll {
+            display: inline-flex;
+            gap: 15px;
+        }
+        
+        .story-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #fffc00, #ff00aa);
+            padding: 3px;
+            display: inline-block;
+        }
+        
+        .story-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .story-inner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .chat-list {
+            padding: 10px;
+            overflow-y: auto;
+            height: calc(100vh - 220px);
+        }
+        
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+        
+        .chat-info {
+            flex: 1;
+        }
+        
+        .chat-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .chat-preview {
+            color: #888;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-time {
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+        
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #666;
+            cursor: pointer;
+        }
+        
+        .nav-btn.active {
+            color: #333;
+        }
+        
+        /* Message Styles */
+        .message-container {
+            padding: 15px;
+            height: calc(100vh - 180px);
+            overflow-y: auto;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+        }
+        
+        .message.sent {
+            background: #4a6ee0;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message.received {
+            background: #f1f1f1;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-time {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .message.received .message-time {
+            color: rgba(0, 0, 0, 0.4);
+        }
+        
+        .message-input-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px 15px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .send-btn {
+            background: #4a6ee0;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .media-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #4a6ee0;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Container -->
+    <div id="auth-container" class="auth-container">
+        <div class="logo">
+            <i class="fas fa-ghost"></i>
+            <h1>Safe Chat</h1>
+        </div>
+        
+        <div class="auth-form">
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button id="login-btn">Log In</button>
+            <button id="signup-btn">Sign Up</button>
+            
+            <div class="divider">OR</div>
+            
+            <button id="google-login-btn" class="google-btn">
+                <i class="fab fa-google"></i> Continue with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- Chat Container (hidden by default) -->
+    <div id="chat-container" class="hidden">
+        <!-- Snapchat-like Header -->
+        <header class="snap-header">
+            <button class="header-btn" id="profile-btn">
+                <img id="user-avatar" src="" alt="Profile">
+            </button>
+            
+            <div class="header-tabs">
+                <button class="tab-btn active" data-tab="chats"><i class="fas fa-comment-dots"></i></button>
+                <button class="tab-btn" data-tab="camera"><i class="fas fa-camera"></i></button>
+                <button class="tab-btn" data-tab="stories"><i class="fas fa-users"></i></button>
+            </div>
+            
+            <button class="header-btn" id="new-chat-btn">
+                <i class="fas fa-edit"></i>
+            </button>
+        </header>
+
+        <!-- Stories Row -->
+        <div class="stories-container">
+            <div class="stories-scroll" id="stories-scroll">
+                <!-- Stories will load here -->
+            </div>
+        </div>
+
+        <!-- Chat List -->
+        <div class="chat-list" id="chat-list">
+            <!-- Chats will load here -->
+        </div>
+
+        <!-- Camera View (hidden by default) -->
+        <div class="camera-view hidden" id="camera-view">
+            <video id="camera-preview" autoplay playsinline></video>
+            <div class="camera-controls">
+                <button id="close-camera" class="camera-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button id="capture-btn" class="snap-btn"></button>
+                <button id="flip-camera" class="camera-btn">
+                    <i class="fas fa-camera-retro"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-tab="chats">
+                <i class="fas fa-comment"></i>
+            </button>
+            <button class="nav-btn" data-tab="discover">
+                <i class="fas fa-compass"></i>
+            </button>
+            <button class="nav-btn" data-tab="profile">
+                <i class="fas fa-user"></i>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
+    
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBkCF3ymFmQnwGF-jZ1n6rQirsLHI1Kao4",
+            authDomain: "safe-chat-6eef1.firebaseapp.com",
+            databaseURL: "https://safe-chat-6eef1-default-rtdb.firebaseio.com",
+            projectId: "safe-chat-6eef1",
+            storageBucket: "safe-chat-6eef1.firebasestorage.app",
+            messagingSenderId: "1085710211274",
+            appId: "1:1085710211274:web:d52d361b337e70d36ebc33"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // DOM Elements
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        const authContainer = document.getElementById('auth-container');
+        const chatContainer = document.getElementById('chat-container');
+        const profileBtn = document.getElementById('profile-btn');
+        const userAvatar = document.getElementById('user-avatar');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Google Auth Provider
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        // Auth State Listener
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                authContainer.classList.add('hidden');
+                chatContainer.classList.remove('hidden');
+                
+                // Set user avatar
+                if (user.photoURL) {
+                    userAvatar.src = user.photoURL;
+                } else {
+                    userAvatar.src = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp";
+                }
+                
+                // Load chats and stories
+                loadChats();
+                loadStories();
+            } else {
+                // No user is signed in
+                authContainer.classList.remove('hidden');
+                chatContainer.classList.add('hidden');
+            }
+        });
+
+        // Email Login
+        loginBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .catch((error) => {
+                    alert(error.message);
+                });
+        });
+
+        // Email Sign Up
+        signupBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Create user document in Firestore
+                    return db.collection('users').doc(userCredential.user.uid).set({
+                        uid: userCredential.user.uid,
+                        email: email,
+                        displayName: email.split('@')[0],
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .catch((error) => {
+                    alert(error.message);
+                });
+        });
+
+        // Google Login
+        googleLoginBtn.addEventListener('click', () => {
+            auth.signInWithPopup(googleProvider)
+                .then((result) => {
+                    // Check if user is new
+                    if (result.additionalUserInfo.isNewUser) {
+                        // Create user document in Firestore
+                        return db.collection('users').doc(result.user.uid).set({
+                            uid: result.user.uid,
+                            email: result.user.email,
+                            displayName: result.user.displayName,
+                            photoURL: result.user.photoURL,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                })
+                .catch((error) => {
+                    alert(error.message);
+                });
+        });
+
+        // Load Chats
+        function loadChats() {
+            const currentUser = auth.currentUser;
+            if (!currentUser) return;
+
+            db.collection('chats')
+                .where('participants', 'array-contains', currentUser.uid)
+                .orderBy('lastUpdated', 'desc')
+                .onSnapshot((snapshot) => {
+                    const chatList = document.getElementById('chat-list');
+                    chatList.innerHTML = '';
+                    
+                    snapshot.forEach((doc) => {
+                        const chat = doc.data();
+                        const otherUserId = chat.participants.find(uid => uid !== currentUser.uid);
+                        
+                        // Get user info
+                        db.collection('users').doc(otherUserId).get()
+                            .then((userDoc) => {
+                                const user = userDoc.data();
+                                const chatItem = document.createElement('div');
+                                chatItem.className = 'chat-item';
+                                chatItem.innerHTML = `
+                                    <img src="${user.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp'}" class="chat-avatar" alt="${user.displayName}">
+                                    <div class="chat-info">
+                                        <div class="chat-name">${user.displayName}</div>
+                                        <div class="chat-preview">${chat.lastMessage || 'No messages yet'}</div>
+                                    </div>
+                                    <div class="chat-time">${formatTime(chat.lastUpdated?.toDate())}</div>
+                                `;
+                                chatList.appendChild(chatItem);
+                            });
+                    });
+                });
+        }
+
+        // Load Stories
+        function loadStories() {
+            const currentUser = auth.currentUser;
+            if (!currentUser) return;
+
+            db.collection('stories')
+                .where('timestamp', '>', new Date(Date.now() - 24 * 60 * 60 * 1000)) // Last 24 hours
+                .orderBy('timestamp', 'desc')
+                .onSnapshot((snapshot) => {
+                    const storiesScroll = document.getElementById('stories-scroll');
+                    storiesScroll.innerHTML = '';
+                    
+                    snapshot.forEach((doc) => {
+                        const story = doc.data();
+                        
+                        // Get user info
+                        db.collection('users').doc(story.userId).get()
+                            .then((userDoc) => {
+                                const user = userDoc.data();
+                                const storyElement = document.createElement('div');
+                                storyElement.className = 'story-circle';
+                                storyElement.innerHTML = `
+                                    <div class="story-inner">
+                                        <img src="${story.mediaUrl}" alt="${user.displayName}'s story">
+                                    </div>
+                                `;
+                                storiesScroll.appendChild(storyElement);
+                            });
+                    });
+                });
+        }
+
+        // Format time
+        function formatTime(date) {
+            if (!date) return '';
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Tab Navigation
+        document.querySelectorAll('.tab-btn, .nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                
+                // Handle camera tab
+                if (tab === 'camera') {
+                    openCamera();
+                    return;
+                }
+                
+                // Update active tabs
+                document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+                document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+                
+                // Here you would load content for each tab
+                console.log(`Switched to ${tab} tab`);
+            });
+        });
+
+        // Camera Functions
+        let stream = null;
+
+        async function openCamera() {
+            try {
+                document.getElementById('camera-view').classList.remove('hidden');
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user' },
+                    audio: false
+                });
+                document.getElementById('camera-preview').srcObject = stream;
+            } catch (err) {
+                console.error('Camera error:', err);
+                alert('Could not access camera');
+            }
+        }
+
+        function closeCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('camera-view').classList.add('hidden');
+        }
+
+        document.getElementById('close-camera').addEventListener('click', closeCamera);
+    </script>
+</body>
+</html>
